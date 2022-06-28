@@ -4,104 +4,111 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ---- eval = TRUE, include=FALSE----------------------------------------------
+## ---- eval = TRUE, include=TRUE-----------------------------------------------
 ## Load library
-library(kableExtra)
+library(tidyverse) # Load the tidyverse, mainly for ggplot
+library(kableExtra) # For fancy tables
+library(skewBART) # Our package
+library(zeallot) # For the %<-% operator, used when generating data
 options(knitr.table.format = 'markdown')
-library(skewBART)
-library(zeallot)
-library(ggplot2)
-library(glmnet)
-library(methods)
-library(truncnorm)
-library(Matrix)
-library(TruncatedNormal)
-library(mvtnorm)
-library(dplyr)
-
-## ---- eval = FALSE------------------------------------------------------------
-#  library(kableExtra)
-#  options(knitr.table.format = 'markdown')
-#  library(skewBART)
-#  library(zeallot)
-#  library(ggplot2)
-#  library(glmnet)
-#  library(methods)
-#  library(truncnorm)
-#  library(Matrix)
-#  library(TruncatedNormal)
-#  library(mvtnorm)
-#  library(dplyr)
 
 ## -----------------------------------------------------------------------------
 data(GAAD)
 Y <- GAAD$subCAL
-X <- GAAD %>% select("Age", "Female", "Bmi", "Smoker", "Hba1cfull")
+X <- GAAD %>% dplyr::select(Age, Female, Bmi, Smoker, Hba1cfull)
 
 ## -----------------------------------------------------------------------------
 hypers <- UHypers(X, Y, num_tree = 20)
-opts <- UOpts(num_burn = 10, num_save = 10)
+opts <- UOpts(num_burn = 250, num_save = 250)
 
 ## -----------------------------------------------------------------------------
-## Fit the model
-fitted_skewbart <- skewBART(X, Y, X, hypers, opts)
+x_grid <- expand.grid(Hba1cfull = seq(5, 16.4, length = 20), 
+                      Smoker = c(0,1), Female = c(0,1))
+
+## ---- warning=FALSE-----------------------------------------------------------
+set.seed(77777)
+fitted_skewbart <- skewBART_pd(X, Y, vars = c("Hba1cfull", "Smoker", "Female"), 
+                               x_grid = x_grid,
+                               hypers = hypers, opts = opts)
 
 ## -----------------------------------------------------------------------------
-mean(fitted_skewbart$alpha)
+set.seed(77777)
+PD <- GAAD$subPD
+hypers <- UHypers(X, PD, num_tree = 20)
+fitted_skewbart_pd <- skewBART_pd(X, PD, vars = colnames(x_grid), 
+                                  x_grid = x_grid, 
+                                  hypers = hypers, opts = opts)
+
+## ---- warning = FALSE---------------------------------------------------------
+set.seed(77777)
+hypers <- UHypers(X, log(Y), num_tree = 20)
+fitted_skewbart_log <- skewBART(X, log(Y), X, hypers, opts)
 
 ## -----------------------------------------------------------------------------
-mean(fitted_skewbart$lambda)
+fitted_skewbart$loo$estimates["elpd_loo",1]
 
 ## -----------------------------------------------------------------------------
-uni_samples <- sapply(1:opts$num_save, function(i) fitted_skewbart$y_hat_test[i,] 
-                  + fitted_skewbart$lambda[i] * sqrt(2/pi))
-# The estimated CAL for the first 20 subjects
-rowMeans(uni_samples)[1:20]
+fitted_skewbart_log$loo$estimates["elpd_loo",1] - sum(log(Y))
 
 ## -----------------------------------------------------------------------------
-library(dplyr)
-data(GAAD)
-X <- GAAD %>% select("Age", "Female", "Bmi", "Smoker", "Hba1cfull")
-Y <- GAAD %>% select(subCAL, subPD)
+hist(fitted_skewbart$alpha)
+hist(fitted_skewbart_log$alpha)
 
 ## -----------------------------------------------------------------------------
-hypers <- Hypers(X = as.matrix(X), Y = Y, num_tree = 20)
-opts <- Opts(num_burn = 10, num_save = 10)
+head(fitted_skewbart$partial_dependence_samples)
+head(fitted_skewbart$partial_dependence_summary)
 
 ## -----------------------------------------------------------------------------
-fitted_Multiskewbart <- MultiskewBART(X = X, Y = Y, test_X = X, hypers=hypers, opts=opts)
+ggplot(fitted_skewbart$partial_dependence_summary, 
+      aes(x = Hba1cfull, y = y_hat_mean, color = interaction(Female, Smoker))) +
+  geom_point() + geom_line() + theme_bw() + ylab("Predicted CAL") + 
+  theme(legend.position = "bottom")
 
 ## -----------------------------------------------------------------------------
-colMeans(fitted_Multiskewbart$lambda)
+qplot(fitted_skewbart_log$y_hat_train_mean, log(Y)) +
+  geom_abline(slope = 1, intercept = 0) + theme_bw() +
+  xlab("Predicted log-CAL") + ylab("Observed log-CAL")
 
 ## -----------------------------------------------------------------------------
-# the first response
-ind <- 1 # response index
-samples_CAL <- sapply(1:opts$num_save, function(i) fitted_Multiskewbart$y_hat_test[,ind,i] + 
-                        fitted_Multiskewbart$lambda[i,ind] * sqrt(2/pi))
-
-# second response
-ind <- 2 # response index
-samples_PPD <- sapply(1:opts$num_save, function(i) fitted_Multiskewbart$y_hat_test[,ind,i] + 
-                        fitted_Multiskewbart$lambda[i,ind] * sqrt(2/pi))
+X <- GAAD %>% select("Age", "Female", "Bmi", "Smoker", "Hba1cfull") %>% as.matrix()
+Y <- GAAD %>% select(subCAL, subPD) %>% as.matrix()
 
 ## -----------------------------------------------------------------------------
-rowMeans(samples_CAL)[1:20]
+hypers <- Hypers(X = X, Y = Y, num_tree = 20)
+opts <- Opts(num_burn = 50, num_save = 50, num_print = 10)
+
+## ---- warning = FALSE---------------------------------------------------------
+set.seed(77777)
+fitted_Multiskewbart <- MultiskewBART_pd(
+  X = X, Y = Y, vars = colnames(x_grid), x_grid = x_grid, hypers = hypers, 
+  opts = opts
+)
 
 ## -----------------------------------------------------------------------------
-rowMeans(samples_PPD)[1:20]
+fitted_Multiskewbart$loo
 
 ## -----------------------------------------------------------------------------
-apply(fitted_Multiskewbart$Sigma, c(1,2), mean)
+head(fitted_Multiskewbart$partial_dependence_summary)
+fitted_Multiskewbart$partial_dependence_summary %>%
+  ggplot(aes(x = Hba1cfull, y = y_hat_mean, 
+             color = interaction(Smoker, Female))) + 
+  geom_line() + geom_point() + facet_wrap(.~outcome, scales = "free_y") + 
+  theme_bw() +theme(legend.position = "bottom") + ylab("Prediction") +
+  xlab("Hba1c")
 
 ## -----------------------------------------------------------------------------
-est_cov <- apply(fitted_Multiskewbart$Sigma, c(1,2), mean)
-est_cov[1,2]/sqrt(est_cov[1,1])/sqrt(est_cov[2,2])
+skew_pd_cal <- fitted_skewbart$partial_dependence_summary %>%
+  mutate(outcome = "subCAL", method = "skewBART")
+skew_pd_pd <- fitted_skewbart_pd$partial_dependence_summary %>%
+  mutate(outcome = "subPD", method = "skewBART")
+mskew_pd <- fitted_Multiskewbart$partial_dependence_summary %>% 
+  mutate(method = "MultiskewBART")
+skew_pd <- rbind(skew_pd_cal, skew_pd_pd, mskew_pd)
 
-## -----------------------------------------------------------------------------
-# MSE from univariate skewBART
-mean((Y[,1] - rowMeans(uni_samples))^2) 
-
-# MSE from multivariate skewBART
-mean((Y[,1] - rowMeans(samples_CAL))^2)
+skew_pd %>% 
+  ggplot(aes(x = Hba1cfull, y = y_hat_mean, 
+             color = interaction(Smoker, Female))) + 
+  geom_line() + geom_point() + facet_grid(outcome~method, scales = "free_y") + 
+  theme_bw() +theme(legend.position = "bottom") + ylab("Prediction") +
+  xlab("Hba1c")
 
