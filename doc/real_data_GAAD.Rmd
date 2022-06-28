@@ -1,0 +1,190 @@
+---
+title: "skewBART for real data analysis (GAAD)"
+output: rmarkdown::html_vignette
+author: Seungha Um
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+vignette: >
+  %\VignetteIndexEntry{real_data_GAAD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Introduction 
+
+This vignette demonstrates how to fit skewBART model with `skewBART` package for Type-2 diabetic Gullahspeaking African-Americans (GAAD) study. The small MCMC iterations and tree numbers are used for example codes. The dataset is inclduede in the package.
+
+# Univariate skewed response
+
+There are two responses in GAAD dataset; the mean clinical attachment level (CAL) and the mean periodontal pocket depth (PPD).
+
+The CAL is used as the univariate response in the following example. 
+
+Load the GAAD dataset.
+
+
+```{r, eval = TRUE, include=FALSE}
+## Load library
+library(kableExtra)
+options(knitr.table.format = 'markdown')
+library(skewBART)
+library(zeallot)
+library(ggplot2)
+library(glmnet)
+library(methods)
+library(truncnorm)
+library(Matrix)
+library(TruncatedNormal)
+library(mvtnorm)
+library(dplyr)
+```
+
+```{r, eval = FALSE}
+library(kableExtra)
+options(knitr.table.format = 'markdown')
+library(skewBART)
+library(zeallot)
+library(ggplot2)
+library(glmnet)
+library(methods)
+library(truncnorm)
+library(Matrix)
+library(TruncatedNormal)
+library(mvtnorm)
+library(dplyr)
+```
+
+
+```{r}
+data(GAAD)
+Y <- GAAD$subCAL
+X <- GAAD %>% select("Age", "Female", "Bmi", "Smoker", "Hba1cfull")
+```
+
+
+The function `UHypers` produces a list of the hyperparameters of the univariate skewBART model. 
+
+The function `UOpts` produces a list of the parameters for running the Markov chain for univariate skewBART model.
+
+```{r}
+hypers <- UHypers(X, Y, num_tree = 20)
+opts <- UOpts(num_burn = 10, num_save = 10)
+```
+
+We can fit the skewBART model as 
+```{r}
+## Fit the model
+fitted_skewbart <- skewBART(X, Y, X, hypers, opts)
+```
+
+The posterior mean of skewness levels $\alpha$
+
+```{r}
+mean(fitted_skewbart$alpha)
+```
+
+The posterior mean of $\lambda = \alpha/\sqrt{1+\alpha^2}$
+
+```{r}
+mean(fitted_skewbart$lambda)
+```
+
+The estimated $E(y)$ where $y = f(x) + \epsilon$ and $ \epsilon\sim SN(0,\alpha,\tau^2)$. Note that $E(\epsilon) = \tau \alpha / \sqrt{1+\alpha^2}$
+
+```{r}
+uni_samples <- sapply(1:opts$num_save, function(i) fitted_skewbart$y_hat_test[i,] 
+                  + fitted_skewbart$lambda[i] * sqrt(2/pi))
+# The estimated CAL for the first 20 subjects
+rowMeans(uni_samples)[1:20]
+```
+
+
+
+# Multivariate skewed response
+
+Bivariate skewed responses; the mean clinical attachment level (CAL) and the mean periodontal pocket depth (PPD).
+
+```{r}
+library(dplyr)
+data(GAAD)
+X <- GAAD %>% select("Age", "Female", "Bmi", "Smoker", "Hba1cfull")
+Y <- GAAD %>% select(subCAL, subPD)
+```
+
+
+The function `UHypers` produces a list of the hyperparameters for multivariate skewBART model
+
+The function `UOpts` produces a list of the parameters for running the Markov chain for multivariate skewBART model.
+
+```{r}
+hypers <- Hypers(X = as.matrix(X), Y = Y, num_tree = 20)
+opts <- Opts(num_burn = 10, num_save = 10)
+```
+
+We can fit the model as 
+```{r}
+fitted_Multiskewbart <- MultiskewBART(X = X, Y = Y, test_X = X, hypers=hypers, opts=opts)
+```
+
+
+The posterior mean of skewness levels $\lambda_1$ and $\lambda_2$
+
+```{r}
+colMeans(fitted_Multiskewbart$lambda)
+```
+
+The estimated $E(\pmb{y}) = f(x) + \pmb{\epsilon}$ where $\pmb{\epsilon}\sim MSN(0,\lambda,\Sigma)$
+
+```{r}
+# the first response
+ind <- 1 # response index
+samples_CAL <- sapply(1:opts$num_save, function(i) fitted_Multiskewbart$y_hat_test[,ind,i] + 
+                        fitted_Multiskewbart$lambda[i,ind] * sqrt(2/pi))
+
+# second response
+ind <- 2 # response index
+samples_PPD <- sapply(1:opts$num_save, function(i) fitted_Multiskewbart$y_hat_test[,ind,i] + 
+                        fitted_Multiskewbart$lambda[i,ind] * sqrt(2/pi))
+```
+
+The estimated CAL for the first 20 subjects
+
+```{r}
+rowMeans(samples_CAL)[1:20]
+```
+
+The estimated PPD for the first 20 subjects 
+
+```{r}
+rowMeans(samples_PPD)[1:20]
+```
+
+The estimated covariance matrix is
+
+```{r}
+apply(fitted_Multiskewbart$Sigma, c(1,2), mean)
+```
+
+
+The estimated correlation between two responses is 
+
+```{r}
+est_cov <- apply(fitted_Multiskewbart$Sigma, c(1,2), mean)
+est_cov[1,2]/sqrt(est_cov[1,1])/sqrt(est_cov[2,2])
+```
+
+Compare univariate skewBART fit and multivariate skewBART fit with mean squared error (MSE)
+
+```{r}
+# MSE from univariate skewBART
+mean((Y[,1] - rowMeans(uni_samples))^2) 
+
+# MSE from multivariate skewBART
+mean((Y[,1] - rowMeans(samples_CAL))^2)
+```
