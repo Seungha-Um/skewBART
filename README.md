@@ -15,5 +15,12 @@ The packages can be installed with the `devtools` package:
 
     library(devtools) 
     devtools::install_github(repo='Seungha-Um/skewBART') 
-    # or 
+
+The package with the vignette’s included can be installed with
+
     devtools::install_github(repo='Seungha-Um/skewBART',build_vignettes = TRUE) 
+
+and then accessed by running (to reproduce our results, one will need to
+increase the number of MCMC samples). One of the vignette’s replicates
+our analysis of the dataset, a subset of which has been included, while
+the other illustrates our methods on simulated data.
