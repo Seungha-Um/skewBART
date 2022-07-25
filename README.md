@@ -21,7 +21,11 @@ The package with the vignette’s included can be installed with
     devtools::install_github(repo='Seungha-Um/skewBART',build_vignettes = TRUE) 
 
 and then accessed by running `browseVignettes("skewBART")` (to reproduce
-our results, one will need to increase the number of MCMC samples). One
-of the vignette’s replicates our analysis of the GAAD dataset, a subset
-of which has been included, while the other illustrates our methods on
-simulated data.
+our results, one will need to increase the number of MCMC samples).
+Alternatively, Vignette is available at
+[Simulation](https://rpubs.com/sheom0808/926961) and [GAAD
+dataset](https://rpubs.com/sheom0808/926959).
+
+One of the vignette’s replicates our analysis of the GAAD dataset, a
+subset of which has been included, while the other illustrates our
+methods on simulated data.
