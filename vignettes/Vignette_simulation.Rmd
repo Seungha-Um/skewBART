@@ -5,8 +5,8 @@ date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Bayesian Additive Regression Trees for Multivariate skewed responses}
-  %\VignetteEngine{R.rsp::asis}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
 editor_options: 
   chunk_output_type: console
 ---
