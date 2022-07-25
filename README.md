@@ -22,7 +22,7 @@ The package with the vignette’s included can be installed with
 
 and then accessed by running `browseVignettes("skewBART")` (to reproduce
 our results, one will need to increase the number of MCMC samples).
-Alternatively, Vignette is available at
+Alternatively, vignettes are available at
 [Simulation](https://rpubs.com/sheom0808/926961) and [GAAD
 dataset](https://rpubs.com/sheom0808/926959).
 
