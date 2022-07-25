@@ -6,7 +6,7 @@ Author: Seungha Um
 Maintainer: Seungha Um <sheom0808@gmail.com>
 Description: Implements the SkewBART model for skewed univariate/multivariate responses.
 License: GPL-2
-Imports: methods, truncnorm (>= 1.0), glmnet (>= 2.0), sn, Matrix, MASS, TruncatedNormal, zeallot, mvtnorm, loo, dplyr, magrittr, rmarkdown, tidyverse
+Imports: methods, truncnorm (>= 1.0), glmnet (>= 2.0), sn, Matrix, MASS, TruncatedNormal, zeallot, mvtnorm, loo, dplyr, magrittr, rmarkdown, tidyverse, zeallot, kableExtra
 LinkingTo: Rcpp, RcppArmadillo
 Depends: 
     R (>= 2.10),
