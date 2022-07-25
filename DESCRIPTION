@@ -14,6 +14,7 @@ Depends:
 Suggests: 
     rmarkdown,
     knitr,
-    zeallot
+    zeallot,
+    R.rsp
 RoxygenNote: 7.2.0
-VignetteBuilder: knitr
+VignetteBuilder: R.rsp
