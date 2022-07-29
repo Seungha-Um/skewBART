@@ -16,7 +16,7 @@ The packages can be installed with the `devtools` package:
     library(devtools) 
     devtools::install_github(repo='Seungha-Um/skewBART') 
 
-The package with the vignette’s included can be installed with
+The package with the vignettes can be installed with
 
     devtools::install_github(repo='Seungha-Um/skewBART',build_vignettes = TRUE) 
 
