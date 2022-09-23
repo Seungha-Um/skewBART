@@ -52,7 +52,7 @@ Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
 
 #' Fit the MultiskewBART model
 #'
-#' Fits the MultiskewBART model of Um et al. (2021+). The model is of the form \deqn{Y_i = \mu(X_i) + \epsilon_i} where \eqn{\epsilon_i} has a multivariate skew-normal distribution.
+#' Fits the MultiskewBART model of Um et al. (2022). The model is of the form \deqn{Y_i = \mu(X_i) + \epsilon_i} where \eqn{\epsilon_i} has a multivariate skew-normal distribution.
 #'
 #' @param X NxP matrix of training data covariates.
 #' @param Y Nxk matrix of training data response.
@@ -76,7 +76,7 @@ Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
 #'         iteration of the chain
 #'   \item Sigma: posterior samples of the covariance matrix
 #'   \item lambda: posterior samples of skewness parameters
-#'   \item loo: the PSIS-loo computed with loo function in the loo package
+#'   \item likelihood_mat: (N x num_save) matrix of log-likelihood values to calculate the log pseudo marginal likelihood (LPML)
 #' }
 #' @export
 #'
@@ -197,9 +197,12 @@ MultiskewBART <- function(X, Y, test_X, hypers = NULL, opts = NULL, do_skew = TR
     }
     like_skew[k,] <- sapply(1:nrow(Y_res), f_apply)
   }
-  loo_out <- loo(like_skew)
-
-
+  
+  #loo_out <- loo(like_skew)
+  
+  likelihood_mat <- like_skew
+  #likelihood <- rowSums(like_skew)
+    
   return(list(y_hat_train = y_hat_train, 
               y_hat_test = y_hat_test, 
               y_hat_train_mean = y_hat_train_mean, 
@@ -208,9 +211,8 @@ MultiskewBART <- function(X, Y, test_X, hypers = NULL, opts = NULL, do_skew = TR
               f_hat_test = mu_test,
               f_hat_train_mean = mu_train_mean,
               f_hat_test_mean = mu_test_mean,
-              lambda = lambda, Sigma = Sigma, loo = loo_out))
-
-  
+              lambda = lambda, Sigma = Sigma,
+              likelihood_mat = likelihood_mat))
 
 }
 

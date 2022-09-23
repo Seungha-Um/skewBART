@@ -23,7 +23,7 @@ The package with the vignettes can be installed with
 and then accessed by running `browseVignettes("skewBART")` (to reproduce
 our results, one will need to increase the number of MCMC samples).
 Alternatively, vignettes are available at
-[Simulation](https://rpubs.com/sheom0808/926961) and [GAAD
+[Simulation](https://rpubs.com/sheom0808/946709) and [GAAD
 dataset](https://rpubs.com/sheom0808/926959).
 
 One of the vignette’s replicates our analysis of the GAAD dataset, a

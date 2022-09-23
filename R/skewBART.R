@@ -81,7 +81,7 @@ UHypers <- function(X,Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
 #'   \item alpha: posterior samples of the skewness parameter of the skew-normal distribution
 #'   \item tau: posterior samples of the standard deviation of the latent normal distribution in the parameter-expanded representation of the skew-normal; usually not of direct interest.
 #'   \item lambda: posterior samples of the regression coefficient of the truncated normal variables in the parameter-expanded representation of the skew-normal distribution; usually not of direct interest.
-#'   \item loo: the PSIS-loo computed with loo function in the loo package.
+#'   \item likelihood_mat: (N x num_save) matrix of log-likelihood values to calculate the log pseudo marginal likelihood (LPML)
 #' }
 #'
 #' @examples
@@ -185,16 +185,17 @@ skewBART <- function(X, Y, test_X, hypers = NULL, opts = NULL){
   like_iter <- function(t) {
     dsn(Y, xi = f_hat_train[t,], omega = sigma[t], alpha = alpha[t], log = TRUE)
   }
-  like_skew <- sapply(1:length(alpha), like_iter)
-  loo_out <- loo(t(like_skew))
-
+  likelihood_mat <- t(sapply(1:length(alpha), like_iter))
+  #loo_out <- loo(t(like_skew))
+  #likelihood <- rowSums(likelihood_mat)
+  
   return(list(y_hat_train = y_hat_train, y_hat_test = y_hat_test,
               y_hat_train_mean = y_hat_train_mean, y_hat_test_mean = y_hat_test_mean,
               f_hat_train = f_hat_train, f_hat_test = f_hat_test, 
               f_hat_train_mean = f_hat_train_mean, 
               f_hat_test_mean = f_hat_test_mean,
               sigma = sigma, tau = tau, alpha = alpha, lambda = lambda, 
-              loo = loo_out))
+              likelihood_mat = likelihood_mat))
 }
 
 

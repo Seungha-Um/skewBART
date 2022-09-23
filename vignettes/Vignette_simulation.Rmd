@@ -30,6 +30,8 @@ library(tidyverse) # Load the tidyverse, mainly for ggplot
 library(kableExtra) # For fancy tables
 library(skewBART) # Our package
 library(zeallot) # For the %<-% operator, used when generating data
+library(tictoc)
+library(loo)
 options(knitr.table.format = 'markdown')
 ```
 
@@ -73,7 +75,7 @@ provided by the user; see `?UHypers` for more details.
 
 ```{r, eval = TRUE, include=TRUE}
 hypers <- UHypers(X, Y, num_tree = 20)
-opts <- UOpts(num_burn = 250, num_save = 250)
+opts <- UOpts(num_burn = 100, num_save = 500)
 ```
 
 The function `UOpts` produces a list of the parameters for running the Markov
@@ -87,8 +89,19 @@ updated.
 After creating the hyperparameters and options, we fit the data by running
 ```{r, eval = TRUE, include=TRUE}
 ## Fit the model
+tic("skewBART")
 fitted_skewbart <- skewBART(X = X, Y = Y, test_X = test_X, 
                             hypers = hypers, opts = opts)
+toc()
+```
+
+Alternatively, we can use the function `skewBART_parallel` running multiple `skewBART` threads in parallel as provided by the `parallel` package. The option `cores` specifies the number of cores to employ in multi-threading. 
+
+```{r}
+tic("skewBART in parallel")
+fitted_skewbart_parallel <- skewBART_parallel(X = X, Y = Y, test_X = test_X, 
+                         hypers = hypers, opts = opts, cores = 5)
+toc()
 ```
 
 ## Contents of the model fit
@@ -111,6 +124,8 @@ The fitted model is a list containing the following elements:
 - `tau`: posterior samples of parameter $\tau$ in the skew-normal error.
 - `alpha`: posterior samples of parameter $\alpha$ in the skew-normal error.
 - `lambda`: posterior samples of parameter $\lambda$ in the skew-normal error.
+- `likelihood_mat`: matrix of log-likelihood values to calculate the log pseudo marginal likelihood (LPML)
+
 
 The parameters $(\lambda, \tau)$ and $(\alpha, \sigma)$ give equivalent
 descriptions of the skew-normal distribution, and are related by the fact that
@@ -147,6 +162,27 @@ p2 <- ggplot(df_fitted) +
 library(ggpubr)
 ggarrange(p1, p2)
 ```
+
+In our manuscript, log pseudo marginal likelihood (LPML) is computed to evaluate the model performance. Using the `loo` package, the LPML can be conveniently computed after obtaining the MCMC samples from the joint posterior.
+
+
+```{r}
+loo(fitted_skewbart$likelihood_mat, r_eff = NA)
+```
+
+LPML is obtained by the estimate of expected log pointwise predictive density (elpd_loo). You may have the warning message regarding Pareto k diagnostic values. In the `loo` package, LPML is computed using Pareto smoothed importance sampling and reliability of estimates is evaluated using the shape parameter k. In practice, good performance has been observed for values of k up to 0.7. See help('pareto-k-diagnostic') for details in the `loo` package. Note that this vignette is demonstrated under the small MCMC iterations and tree numbers to reduce computation time. To get k > 0.7, larger values of MCMC iterateions and tree numbers should be used. 
+
+
+
+Also, the root mean square error can be computed with the posterior mean of the predicted values;
+
+```{r, eval = TRUE, include=TRUE}
+rmse <- function(x,y) sqrt(mean((x-y)^2))
+rmse(test_Y, fitted_skewbart$y_hat_test_mean)
+```
+
+
+
 
 # Multivariate skewed response 
 
@@ -202,14 +238,26 @@ and `UOpts`. We use these to set the hyperparameters and MCMC options.
 ```{r, eval = TRUE}
 ## Create a list of the hyperparameters of the model. 
 hypers <- Hypers(X = X, Y = Y, num_tree = 20)
-opts <- Opts(num_burn = 50, num_save = 50)
+opts <- Opts(num_burn = 50, num_save = 100)
 ```
 
 ## Fitting the multi-skewBART model
 
 The model is fit using the `MultiskewBART` function:
 ```{r, eval = TRUE, include=TRUE}
+tic("MultiskewBART")
 fitted_Multiskewbart <- MultiskewBART(X = X, Y = Y, test_X = test_X, hypers=hypers, opts=opts) 
+toc()
+```
+
+Alternatively, we can use the function `MultiskewBART_parallel` running multiple `MultiskewBART` threads in parallel as provided by the `parallel`. The option `cores` specifies the number of cores to employ in multi-threading.
+
+```{r}
+tic("MultiskewBART in parallel")
+fitted_Multi_parallel <- MultiskewBART_parallel(X = X, Y = Y, test_X = test_X, 
+                                                hypers = hypers, opts = opts,
+                                                cores = 5)
+toc()
 ```
 
 ## Contents of the Model Fit
@@ -251,5 +299,27 @@ ggplot(df_fitted) + geom_point(aes(fitted, truth, colour=grp), alpha=0.8, shape=
   scale_colour_manual(values=c(response_1 = "darkgreen", response_2= "brown")) +
   theme_bw() + facet_wrap(~grp) + theme(legend.title=element_blank())
 ```
+
+The log pseudo marginal likelihood (LPML) can be computed using `likelihood_mat`.
+
+```{r}
+loo(fitted_Multiskewbart$likelihood_mat, r_eff = NA)
+```
+
+Also, the root mean square error can be computed with the posterior mean of the predicted values;
+
+```{r, eval = TRUE, include=TRUE}
+rmse <- function(x,y) sqrt(mean((x-y)^2))
+rmse(test_Y, fitted_Multiskewbart$y_hat_test_mean)
+```
+
+
+One may wish to use the multi-BART, the multivariate version of the standard BART model. In this case, set the option `do_skew` to FALSE.
+
+```{r, eval = FALSE, include=TRUE}
+fitted_Multiskewbart <- MultiskewBART(X = X, Y = Y, test_X = test_X, 
+                                      do_skew = FALSE, hypers=hypers, opts=opts) 
+```
+
 
 
