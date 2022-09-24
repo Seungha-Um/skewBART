@@ -30,7 +30,7 @@
 #'   \item alpha: posterior samples of the skewness parameter of the skew-normal distribution
 #'   \item tau: posterior samples of the standard deviation of the latent normal distribution in the parameter-expanded representation of the skew-normal; usually not of direct interest.
 #'   \item lambda: posterior samples of the regression coefficient of the truncated normal variables in the parameter-expanded representation of the skew-normal distribution; usually not of direct interest.
-#'   \item loo: the PSIS-loo computed with loo function in the loo package.
+#'   \item likelihood_mat: (N x num_save) matrix of log-likelihood values to calculate the log pseudo marginal likelihood (LPML)
 #'   \item partial_dependence_samples: Samples of the partial dependence function for both y_hat and f_hat. Stored as a data frame with each row corresponding to an iteration of the chain and combination of variables
 #'   \item partial_dependence_summary: Summary of the partial dependence function. Each row corresponds to a combination of variables, and includes the posterior mean and a 95 percent posterior credible interval for f_hat and y_hat.
 #' }
