@@ -2,7 +2,7 @@
 
 This repository contains code to implement the methodology described in
 the paper “Bayesian Additive Regression Trees for Multivariate Skewed
-Responses”, by Um, Linero, Sinha and Bandyopadhyay (2022+, Statistics in
+Responses”, by Um, Linero, Sinha and Bandyopadhyay (2022, Statistics in
 Medicine)
 
 This package uses the primary functions from

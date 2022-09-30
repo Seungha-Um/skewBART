@@ -95,12 +95,16 @@ fitted_skewbart <- skewBART(X = X, Y = Y, test_X = test_X,
 toc()
 ```
 
-Alternatively, we can use the function `skewBART_parallel` running multiple `skewBART` threads in parallel as provided by the `parallel` package. The option `cores` specifies the number of cores to employ in multi-threading. 
+Alternatively, we can use the function `skewBART_parallel` running multiple `skewBART` threads in parallel as provided by the `parallel` package. The option `cores` specifies the number of cores to employ in multi-threading. The `skewBART_parallel` function is only available when you are running R on Mac OS or Linux or other variants of Unix. 
+
 
 ```{r}
 tic("skewBART in parallel")
+## parallel::mcparallel/mccollect do not exist on windows
+if(.Platform$OS.type =='unix'){
 fitted_skewbart_parallel <- skewBART_parallel(X = X, Y = Y, test_X = test_X, 
                          hypers = hypers, opts = opts, cores = 5)
+}
 toc()
 ```
 
@@ -250,13 +254,17 @@ fitted_Multiskewbart <- MultiskewBART(X = X, Y = Y, test_X = test_X, hypers=hype
 toc()
 ```
 
-Alternatively, we can use the function `MultiskewBART_parallel` running multiple `MultiskewBART` threads in parallel as provided by the `parallel`. The option `cores` specifies the number of cores to employ in multi-threading.
+Alternatively, we can use the function `MultiskewBART_parallel` running multiple `MultiskewBART` threads in parallel as provided by the `parallel`. The option `cores` specifies the number of cores to employ in multi-threading. The `MultiskewBART_parallel` function is only available when you are running R on Mac OS or Linux or other variants of Unix. 
+
 
 ```{r}
 tic("MultiskewBART in parallel")
+## parallel::mcparallel/mccollect do not exist on windows
+if(.Platform$OS.type =='unix'){
 fitted_Multi_parallel <- MultiskewBART_parallel(X = X, Y = Y, test_X = test_X, 
                                                 hypers = hypers, opts = opts,
                                                 cores = 5)
+}
 toc()
 ```
 
