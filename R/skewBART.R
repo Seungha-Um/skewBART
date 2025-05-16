@@ -20,6 +20,7 @@
 #' @param tau_rate The rate parameter for an exponential prior on the gating bandwidths.
 #'
 #' @return Returns a list containing the function arguments.
+#' 
 UHypers <- function(X,Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
                    sigma_hat = NULL, shape = 1, width = 0.1, num_tree = 20,
                    alpha_scale = NULL, alpha_shape_1 = 0.5,
