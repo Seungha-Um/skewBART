@@ -1,3 +1,4 @@
+#' @export
 lv_bart_logit <- function(Y, X, cluster_idx, hypers, opts, sigma_mh = 1,
                           Y_test = NULL, X_test = NULL, idx_test = NULL) {
 

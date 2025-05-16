@@ -11,7 +11,7 @@
 #' @param update_alpha If true, alpha is updated using a scaled beta prime prior
 #'
 #' @return Returns a list containing the function arguments
-#'
+#' @export
 Opts <- function(num_burn = 5000, num_thin = 1, num_save = 5000,
                  num_print = 100, update_Sigma_mu = FALSE,
                  update_s = FALSE, update_alpha = FALSE) {

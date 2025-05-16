@@ -20,7 +20,7 @@
 #'   \item lambda: posterior samples of the regression coefficient of the truncated normal variables in the parameter-expanded representation of the skew-normal distribution; usually not of direct interest.
 #'   \item likelihood_mat: (N x num_save) matrix of log-likelihood values to calculate the log pseudo marginal likelihood (LPML)
 #' }
-
+#' @export
 skewBART_parallel <- function(X, Y, test_X, hypers = NULL, opts = NULL, 
                               cores = 2L, nice = 19L){
   

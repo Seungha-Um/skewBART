@@ -12,7 +12,7 @@
 #' @param num_tree Number of trees in the ensemble
 #'
 #' @return Returns a list containing the function arguments.
-
+#' @export
 Hypers <- function(X, Y, group = NULL, alpha = 1, beta = 2, gamma = 0.95, k = 2,
                    num_tree = 20) {
 

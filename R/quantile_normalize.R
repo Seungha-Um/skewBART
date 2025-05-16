@@ -1,3 +1,4 @@
+#' @export
 trank <- function(x) {
   x_unique <- unique(x)
   x_ranks <- rank(x_unique, ties.method = "max")

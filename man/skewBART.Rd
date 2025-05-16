@@ -72,5 +72,4 @@ plot(fitted_skewbart$alpha)
 plot(colMeans(fitted_skewbart$f_hat_test), test_mu, pch = 2)
 abline(a=0,b=1, col = 'green', lwd = 3)
 }
-
 }

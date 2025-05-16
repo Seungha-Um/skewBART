@@ -1,3 +1,4 @@
+#' @export
 update_sigma <- function(Y, Sigma, hypers)
 {
 

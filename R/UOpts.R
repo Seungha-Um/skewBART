@@ -15,7 +15,7 @@
 #' @param update_tau_mean If true, the mean of tau is updated
 #'
 #' @return Returns a list containing the function arguments
-#'
+#' @export
 UOpts <- function(num_burn = 2500, num_thin = 1, num_save = 2500, num_print = 100,
                  update_sigma_mu = TRUE, update_s = FALSE, update_alpha = TRUE,
                  update_beta = FALSE, update_gamma = FALSE, update_tau = TRUE,

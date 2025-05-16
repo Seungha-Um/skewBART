@@ -1,3 +1,4 @@
+#' @export
 dmsn <- function(y, mu, Sigma, lambda, give_log = FALSE) {
   stopifnot(nrow(Sigma) == 2)
   stopifnot(ncol(Sigma) == 2)
