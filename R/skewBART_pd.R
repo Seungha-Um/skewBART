@@ -36,20 +36,20 @@
 #' }
 #' @useDynLib skewBART, .registration=TRUE
 #' @importFrom MCMCpack rwish
-#' @importFrom Rcpp, evalCpp
+#' @importFrom Rcpp evalCpp
 #' @importFrom glmnet cv.glmnet
 #' @importFrom truncnorm rtruncnorm
-#' @importFrom mvtnorm, pmvnorm
-#' @importFrom mvtnorm, dmvnorm
-#' @importFrom MASS, mvrnorm
-#' @importFrom Matrix, Matrix
-#' @importFrom TruncatedNormal, rtmvnorm
-#' @importFrom loo, loo
-#' @importFrom sn, dsn
-#' @importFrom magrittr, "%>%"
-#' @importFrom dplyr, group_by_at
-#' @importFrom dplyr, summarise
-#' @importFrom dplyr, select
+#' @importFrom mvtnorm pmvnorm
+#' @importFrom mvtnorm dmvnorm
+#' @importFrom MASS mvrnorm
+#' @importFrom Matrix Matrix
+#' @importFrom TruncatedNormal rtmvnorm
+#' @importFrom loo loo
+#' @importFrom sn dsn
+#' @importFrom magrittr "%>%"
+#' @importFrom dplyr group_by_at
+#' @importFrom dplyr summarise
+#' @importFrom dplyr select
 #' @exportPattern("^[[:alpha:]]+")
 #' @export
 skewBART_pd <- function(X, Y, vars, x_grid = NULL, hypers = NULL, opts = NULL) {
