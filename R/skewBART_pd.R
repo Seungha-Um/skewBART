@@ -34,6 +34,23 @@
 #'   \item partial_dependence_samples: Samples of the partial dependence function for both y_hat and f_hat. Stored as a data frame with each row corresponding to an iteration of the chain and combination of variables
 #'   \item partial_dependence_summary: Summary of the partial dependence function. Each row corresponds to a combination of variables, and includes the posterior mean and a 95 percent posterior credible interval for f_hat and y_hat.
 #' }
+#' @useDynLib skewBART, .registration=TRUE
+#' @importFrom MCMCpack rwish
+#' @importFrom Rcpp, evalCpp
+#' @importFrom glmnet cv.glmnet
+#' @importFrom truncnorm rtruncnorm
+#' @importFrom mvtnorm, pmvnorm
+#' @importFrom mvtnorm, dmvnorm
+#' @importFrom MASS, mvrnorm
+#' @importFrom Matrix, Matrix
+#' @importFrom TruncatedNormal, rtmvnorm
+#' @importFrom loo, loo
+#' @importFrom sn, dsn
+#' @importFrom magrittr, "%>%"
+#' @importFrom dplyr, group_by_at
+#' @importFrom dplyr, summarise
+#' @importFrom dplyr, select
+#' @exportPattern("^[[:alpha:]]+")
 #' @export
 skewBART_pd <- function(X, Y, vars, x_grid = NULL, hypers = NULL, opts = NULL) {
 
